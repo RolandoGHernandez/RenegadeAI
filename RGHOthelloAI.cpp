@@ -7,27 +7,27 @@
 
 ICS46_DYNAMIC_FACTORY_REGISTER(OthelloAI, rolandoh::RGHOthelloAI, "RGH (Required)");
 
-// "main function" or the "driver" function
-// function carefully knows when to call search() (or the recursion part)
-// interpretation of "best move" is up to this function 
-// calls search multiple times, once for each valid move specifically
+// "main function" or the "driver" function.
+// Function carefully knows when to call search() (the recursion part).
+// Interpretation of "best move" is up to this function which gives it AI behavior.
+// Calls search() multiple times, once for each valid move specifically.
 std::pair<int, int> rolandoh::RGHOthelloAI::chooseMove(const OthelloGameState& state)
 {
-	// clone gamestate without modifying the REAL game state
+	// Clone gamestate without modifying the REAL game state.
 	std::unique_ptr<OthelloGameState> gameStateCopy = state.clone();
 
 
-	// find what our original color is
-	// if true then black; if false then white
+	// Find what our original color is (black or white).
+	// If true then black; if false then white.
 	bool myColor = gameStateCopy->isBlackTurn();
 
-	// make a list of nodes to store all (x,y) data into  
+	// Make a list of nodes to store all (x,y) data into.
 	Node* head = nullptr;
 	Node* tail = head;
 
-	// determine how many valid operations there are for the REAL game state
+	// Determine how many valid operations there are for the REAL game state.
 	// (x, y) == (j, i) == (col, row)
-	//int validMoves = 0;  // validMoves == depth
+	// int validMoves = 0;  // validMoves == depth.
 	for (int i = 0; i < gameStateCopy->board().width(); i++)
 	{
 		for (int j = 0; j < gameStateCopy->board().height(); j++)
@@ -39,51 +39,51 @@ std::pair<int, int> rolandoh::RGHOthelloAI::chooseMove(const OthelloGameState& s
 				tempPair.first = i;
 				tempPair.second = j;
 				Node* newNode = new Node{nullptr, tempPair};
-				if (tail == nullptr)  // if head it empty, make new node equal to next node
+				if (tail == nullptr)  // If head it empty, make new node equal to next node.
 				{
-					head = newNode; // head now points to newNode
-					tail = newNode; // tail now points to newNode
+					head = newNode; // Head now points to newNode.
+					tail = newNode; // Tail now points to newNode.
 				}
 				else
 				{
-					// do some appending
-					tail->next = newNode; // add new node to end
-					tail = newNode;  // reassign tail
+					// Do some appending to the list.
+					tail->next = newNode; // Add new node to end.
+					tail = newNode;  // Reassign tail.
 				}
 			}
 
 		}
 	}
 
-	//OthelloGameState finalState;
+	// OthelloGameState finalState;
 
-	// this is gonna be the best number option
+	// This will be the best number option.
 	int bestNum = 0;
 
-	// create empty pair
+	// Create empty pair.
 	std::pair<int, int> copyXY;
 
 	Node* currentNode = head;
 
-	while (currentNode != nullptr)  // each node represents 1 valid move
+	while (currentNode != nullptr)  // Each node represents 1 valid move.
 	{
-		std::unique_ptr<OthelloGameState> tempGameState = state.clone();  // temp game state reset
+		std::unique_ptr<OthelloGameState> tempGameState = state.clone();  // Temporary game state reset.
 		tempGameState->makeMove(currentNode->cell.first, currentNode->cell.second);
-		// try out new game state
+		// Try out new game state.
 		int tempNum = search(tempGameState, 3, myColor);
 
-		// find out 
+		// Find out 
 		if (tempNum > bestNum)
 			std::cout <<  std::endl;
 		{
-			bestNum = tempNum;  // set bestNum to be bigger
-			copyXY = currentNode->cell;  // new x, y		
+			bestNum = tempNum;  // Set bestNum to be bigger.
+			copyXY = currentNode->cell;  // New (x, y).		
 		}
-		//traverse forward until nullptr
+		// Traverse forward until nullptr is found.
 		currentNode = currentNode->next;
 	}
 
-	// delete all the nodes
+	// Delete all the nodes (deallocation).
 	while (head != nullptr)
 	{
 		Node* tempNode = head;
@@ -91,14 +91,14 @@ std::pair<int, int> rolandoh::RGHOthelloAI::chooseMove(const OthelloGameState& s
 		delete tempNode;	
 	}
 
-	// finally, return the copyXY
+	// Finally, return the copyXY coordinate.
 	return copyXY;
 }
 
 
 
-// depth first search; depth must be LIMITED
-// cannot copy pointer, but CAN modify it by dereferencing using *pointer
+// Depth first search; depth must be LIMITED.
+// Cannot copy pointer, but CAN modify it by dereferencing using *pointer.
 int rolandoh::RGHOthelloAI::search(std::unique_ptr<OthelloGameState>& s, int depth, bool color)
 {
 	if (depth == 0)
@@ -107,7 +107,7 @@ int rolandoh::RGHOthelloAI::search(std::unique_ptr<OthelloGameState>& s, int dep
     }
     else
     {
-    	std::unique_ptr<OthelloGameState> gameStateCopy = s->clone();  // copy original state
+    	std::unique_ptr<OthelloGameState> gameStateCopy = s->clone();  // Copy original game state.
 
 	    Node* head = nullptr;
 		Node* tail = head;
@@ -118,56 +118,56 @@ int rolandoh::RGHOthelloAI::search(std::unique_ptr<OthelloGameState>& s, int dep
 			{
 				if (gameStateCopy->board().cellAt(i, j) == OthelloCell::empty && gameStateCopy->isValidMove(i, j) == true)
 				{
-					//validMoves++;
+					// ValidMoves++;
 					std::pair<int, int> tempPair;
 					tempPair.first = i;
 					tempPair.second = j;
 					Node* newNode = new Node{nullptr, tempPair};
-					if (tail == nullptr)  // if head it empty, make new node equal to next node
+					if (tail == nullptr)  // If head it empty, make new node equal to next node.
 					{
-						head = newNode; // head now points to newNode
-						tail = newNode; // tail now points to newNode
+						head = newNode; // Head now points to newNode.
+						tail = newNode; // Tail now points to newNode.
 					}
 					else
 					{
-						// do some appending
-						tail->next = newNode; // add new node to end
-						tail = newNode;  // reassign tail
+						// Append.
+						tail->next = newNode; // Add new node to end.
+						tail = newNode;  // Reassign tail.
 					}
 				}
 			}
 		}
 
 
-    	if (s->isBlackTurn() == color) // if true == true  (my turn)  // want best number
+    	if (s->isBlackTurn() == color) // if true == true  (my turn)  // want best number.
     	{
-    		// this is gonna be the best number option
+    		// This will be the best number option.
 			int bestNum = 0;
 
-			// create empty pair
+			// Create empty pair.
 			std::pair<int, int> copyXY;
 
 			Node* currentNode = head;
 
-			while (currentNode != nullptr)  // each node represents 1 valid move
+			while (currentNode != nullptr)  // Each node represents 1 valid move.
 			{
-				std::unique_ptr<OthelloGameState> tempGameState = gameStateCopy->clone();  // temp game state reset
+				std::unique_ptr<OthelloGameState> tempGameState = gameStateCopy->clone();  // Temp game state reset.
 				tempGameState->makeMove(currentNode->cell.first, currentNode->cell.second);
-				// try out new game state
+				// Try out new game state.
 				int tempNum = search(tempGameState, depth - 1, color);
 
-				// find out 
+				// Find out best choice.
 				if (tempNum > bestNum)
 				{
-					bestNum = tempNum;  // set bestNum to be bigger
-					copyXY = currentNode->cell;  // new x, y		
+					bestNum = tempNum;  // Set bestNum to be bigger.
+					copyXY = currentNode->cell;  // New (x, y) coordinate.		
 				}
 
-				//traverse forward until nullptr
+				// Traverse forward until nullptr found.
 				currentNode = currentNode->next;
 			}
 
-			// delete all the nodes
+			// Delete all the nodes (deallocation).
 			while (head != nullptr)
 			{
 				Node* tempNode = head;
@@ -176,35 +176,35 @@ int rolandoh::RGHOthelloAI::search(std::unique_ptr<OthelloGameState>& s, int dep
 			}
 			return bestNum;
     	}
-    	else  // opponent turn so want minimum number
+    	else  // Opponent's turn so we want the minimum number.  This will be the worst number option for the opponent's move.
     	{
-    		// this is gonna be the best number option
+    		// This will be the best number option for this move.
 			int worstNum = 0;
 
-			// create empty pair
+			// Create empty pair.
 			std::pair<int, int> copyXY;
 
 			Node* currentNode = head;
 
-			while (currentNode != nullptr)  // each node represents 1 valid move
+			while (currentNode != nullptr)  // Each node represents 1 valid move.
 			{
-				std::unique_ptr<OthelloGameState> tempGameState = gameStateCopy->clone();  // temp game state reset
+				std::unique_ptr<OthelloGameState> tempGameState = gameStateCopy->clone();  // Temporary game state reset.
 				tempGameState->makeMove(currentNode->cell.first, currentNode->cell.second);
-				// try out new game state
+				// Try out new game state.
 				int tempNum = search(tempGameState, depth - 1, color);
 
-				// find out 
+				// Find out best choice.
 				if (tempNum < worstNum)
 				{
-					worstNum = tempNum;  // set bestNum to be bigger
-					copyXY = currentNode->cell;  // new x, y		
+					worstNum = tempNum;  // Set bestNum to be bigger.
+					copyXY = currentNode->cell;  // New (x, y).		
 				}
 
-				//traverse forward until nullptr
+				// Traverse forward until nullptr found.
 				currentNode = currentNode->next;
 			}
 
-			// delete all the nodes
+			// Delete all the nodes (deallocation).
 			while (head != nullptr)
 			{
 				Node* tempNode = head;
@@ -218,14 +218,14 @@ int rolandoh::RGHOthelloAI::search(std::unique_ptr<OthelloGameState>& s, int dep
 
 
 
-// evaluation function to determine best state, NOT the state itself
+// Evaluation function to determine the best state, NOT the current state itself
 int rolandoh::RGHOthelloAI::evaluation(std::unique_ptr<OthelloGameState>& state)
 {
 	if (state->isBlackTurn() == true)  // true means black
 	{
 		return state->blackScore() - state->whiteScore();
 	}
-	else  // false means we are white
+	else  // False means we are white.
 	{
 		return state->whiteScore() - state->blackScore();
 	}
